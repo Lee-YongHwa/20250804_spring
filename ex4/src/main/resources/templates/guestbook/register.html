@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <style>
+            .form-group {margin: 30px 0 30px 0;}
+        </style>
+        <h1 class="mt-4">Guestbook Register Page</h1>
+        <form th:action="@{/guestbook/register}" method="post">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title" class="form-control" placeholder="제목" />
+            </div>
+            <div class="form-group">
+                <label for="content">Content</label>
+                <input type="text" name="content" id="content" class="form-control"
+                       placeholder="내용">
+            </div>
+            <div class="form-group">
+                <label for="writer">Writer</label>
+                <input type="text" name="writer" id="writer" class="form-control"
+                       placeholder="작성자" value="user1">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-register">Submit</button>
+            </div>
+        </form>
+        <script th:inline="javascript">
+            const btnRegister = document.querySelector(".btn-register")
+            const title = document.querySelector("#title")
+            const content = document.querySelector("#content")
+            const writer = document.querySelector("#writer")
+            btnRegister.onclick = function(e) {
+                e.preventDefault();
+                if(!title.value){
+                    title.setAttribute('placeholder', "제목을 입력해주세요")
+                    title.focus();return;
+                }
+                if(!content.value){
+                    content.setAttribute('placeholder', "내용을 입력해주세요")
+                    content.focus();return;
+                }
+                if(!writer.value){
+                    writer.setAttribute('placeholder', "작성자을 입력해주세요")
+                    writer.focus();return;
+                }
+                document.querySelector("form").submit();
+            }
+        </script>
+    </th:block>
+</th:block>
+</html>

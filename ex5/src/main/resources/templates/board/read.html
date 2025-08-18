@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <style>
+            .form-group {
+                margin: 30px 0 30px 0;
+            }
+        </style>
+        <h1 class="mt-4">Board Read Page</h1>
+        <div class="form-group">
+            <label for="bno">Bno</label>
+            <input type="text" name="bno" id="bno" class="form-control" th:value="${boardDTO.bno}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" name="title" id="title" class="form-control" th:value="${boardDTO.title}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <input type="text" name="content" id="content" class="form-control" th:value="${boardDTO.content}"
+                readonly>
+        </div>
+        <div class="form-group">
+            <label for="writerName">WriterName</label>
+            <input type="text" name="writerName" id="writerName" class="form-control" th:value="${boardDTO.writerName}"
+                readonly>
+        </div>
+        <div class="form-group">
+            <label for="writerEmail">WriterEmail</label>
+            <input type="text" name="writerEmail" id="writerEmail" class="form-control" th:value="${boardDTO.writerEmail}"
+                readonly>
+        </div>
+        <div class="form-group">
+            <label>Register Date</label>
+            <input type="text" class="form-control"
+                th:value="${#temporals.format(boardDTO.regDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
+        </div>
+        <div class="form-group">
+            <label>Modified Date</label>
+            <input type="text" class="form-control"
+                th:value="${#temporals.format(boardDTO.modDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
+        </div>
+        <div class="form-group">
+            <a th:href="@{/board/modify(bno=${boardDTO.bno},page=${pageRequestDTO.page}
+                ,type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}" class="btn btn-primary">Modify</a>
+            <a th:href="@{/board/list(page=${pageRequestDTO.page},type=${pageRequestDTO.type}
+                ,keyword=${pageRequestDTO.keyword})}" class="btn btn-info">List</a>
+        </div>
+        <div class="mt-4">
+            <span class="btn btn-outline-secondary" onclick="addReply()">Add Reply</span>
+            <span style="font-size:9pt">댓글:
+            <span id="repCnt" th:text="${boardDTO.replyCount}"></span> 개
+            </span>
+        </div>
+        <div class="list-group replyList" style="margin: 20px 0;"></div>
+        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script th:inline="javascript">
+            window.onload = () => {
+                var msg = [[${msg}]]
+                if (msg) {
+                    const myModal = new bootstrap.Modal(document.querySelector('#myModal'),
+                        { backdrop: true });
+                    document.querySelector(".modal-title").innerHTML = `<p>수정 알림</p>`
+                    document.querySelector(".modal-body").innerHTML = `<p>${msg} 번 글이 수정되었습니다.</p>`
+                    myModal.show()
+                    history.replaceState({}, null, null)
+                }
+            }
+
+        </script>
+    </th:block>
+</th:block>
+
+</html>

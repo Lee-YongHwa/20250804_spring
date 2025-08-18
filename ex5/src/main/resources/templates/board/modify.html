@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <style>
+            .form-group {
+                margin: 30px 0 30px 0;
+            }
+        </style>
+        <h1 class="mt-4">Board Modify Page</h1>
+        <form th:action="@{/board/modify}" method="post" id="frmModify">
+            <div class="form-group">
+                <label for="bno">Bno</label>
+                <input type="text" name="bno" id="bno" class="form-control" th:value="${boardDTO.bno}" readonly />
+            </div>
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title" class="form-control" th:value="${boardDTO.title}" />
+            </div>
+            <div class="form-group">
+                <label for="content">Content</label>
+                <input type="text" name="content" id="content" class="form-control"
+                    th:value="${boardDTO.content}" />
+            </div>
+            <div class="form-group">
+                <label for="writerName">WriterName</label>
+                <input type="text" name="writerName" id="writerName" class="form-control" th:value="${boardDTO.writerName}"
+                    readonly>
+            </div>
+            <div class="form-group">
+                <label for="writerEmail">WriterEmail</label>
+                <input type="text" name="writerEmail" id="writerEmail" class="form-control" th:value="${boardDTO.writerEmail}"
+                    readonly>
+            </div>
+            <div class="form-group">
+                <label for="title">Register Date</label>
+                <input type="text" class="form-control"
+                    th:value="${#temporals.format(boardDTO.regDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="title">Modified Date</label>
+                <input type="text" class="form-control"
+                    th:value="${#temporals.format(boardDTO.modDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
+            </div>
+            <div class="form-group">
+                <input type="hidden" name="page" th:value="${pageRequestDTO.page}">
+                <input type="hidden" name="type" th:value="${pageRequestDTO.type}">
+                <input type="hidden" name="keyword" th:value="${pageRequestDTO.keyword}">
+                <button class="btn btn-primary btnModify">Modify</button>
+                <button class="btn btn-danger btnDelete">Delete</button>
+                <button class="btn btn-info btnBack">Back</button>
+            </div>
+        </form>
+        <script th:inline="javascript">
+            btnModify = document.querySelector(".btnModify")
+            btnDelete = document.querySelector(".btnDelete")
+            btnBack = document.querySelector(".btnBack")
+            frmModify = document.querySelector("#frmModify")
+            btnModify.onclick = e => {
+                e.preventDefault();
+                //유효성 검사
+                frmModify.submit();
+            }
+            btnDelete.onclick = e => {
+                e.preventDefault();
+                frmModify.setAttribute('action', /*[[@{/board/remove}]]*/'remove')
+                frmModify.submit();
+            }
+            btnBack.onclick = e => {
+                e.preventDefault();
+                window.history.back();
+            }
+        </script>
+    </th:block>
+</th:block>
+
+</html>

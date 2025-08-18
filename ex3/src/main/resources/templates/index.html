@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+<h1>Index</h1>
+<ul>
+    <li><a th:href="@{/memo/regMemo}">@{/memo/regMemo}</a></li>
+    <li><a th:href="@{/memo/register}">@{/memo/register}</a></li>
+    <li><a th:href="@{/memo/list}">@{/memo/list}</a></li>
+    <li><a th:href="@{/memo/page(page=1)}">@{/memo/page(page=1)}</a></li>
+    <hr>
+    <li><a th:href="@{/member/join}">@{/member/join}</a></li>
+    <li><a th:href="@{/member/list}">@{/member/list}</a></li>
+
+</ul>
+</body>
+</html>

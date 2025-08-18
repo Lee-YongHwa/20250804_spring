@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Memo Register</h1>
+<form th:action="@{/memo/register}" method="post">
+    메모 : <input type="text" name="memoText"/>
+    <button>등록</button>
+</form>
+</body>
+</html>

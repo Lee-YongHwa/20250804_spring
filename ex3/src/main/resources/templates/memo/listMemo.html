@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table { border-collapse: collapse; width: 400px; }
+        table, th, td { border: 1px solid black;}
+    </style>
+</head>
+<body>
+<h1>Memo List</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Mno</th>
+        <th>Memo Text</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="memoDto : ${result}">
+        <td>[[${memoDto.mno}]]</td>
+        <td>[[${memoDto.memoText}]]</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
