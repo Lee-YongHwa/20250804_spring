@@ -47,6 +47,7 @@ public class BoardServiceImpl implements BoardService {
     // Function<EN, DTO>
     Function<Object[], BoardDTO> fn =
         entity -> entityToDto((Board) entity[0],(Member) entity[1],(Long) entity[2]);
+
     return new PageResultDTO<>(page1, fn);
   }
 
@@ -80,9 +81,9 @@ public class BoardServiceImpl implements BoardService {
     return bno;
   }
 
-  @Override
-  public Long remove(BoardDTO boardDTO) {
-    boardRepository.deleteById(boardDTO.getBno());
-    return boardDTO.getBno();
-  }
+//  @Override
+//  public Long remove(BoardDTO boardDTO) {
+//    boardRepository.deleteById(boardDTO.getBno());
+//    return boardDTO.getBno();
+//  }
 }

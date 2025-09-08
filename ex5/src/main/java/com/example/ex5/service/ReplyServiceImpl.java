@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,16 +21,15 @@ public class ReplyServiceImpl implements ReplyService {
 
   @Override
   public Long register(ReplyDTO replyDTO) {
-    replyRepository.save(dtoToEntity(replyDTO)).getRno();
-    return 0L;
+    return replyRepository.save(dtoToEntity(replyDTO)).getRno();
   }
 
   @Override
   public List<ReplyDTO> getList(Long bno) {
-    List<Reply> result = replyRepository.getRepliesByBoardOrderByBno(
+    List<Reply> result = replyRepository.getRepliesByBoardOrderByRno(
         Board.builder().bno(bno).build()
     );
-    return result.stream().map(reply -> entityToDTO(reply)).collect(Collectors.toList());
+    return result.stream().map(reply -> entityToDto(reply)).collect(Collectors.toList());
   }
 
   @Override

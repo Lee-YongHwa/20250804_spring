@@ -8,8 +8,11 @@ import java.util.List;
 
 public interface ReplyService {
   Long register(ReplyDTO replyDTO);
+
   List<ReplyDTO> getList(Long bno);
+
   void modify(ReplyDTO replyDTO);
+
   void remove(Long rno);
 
   default Reply dtoToEntity(ReplyDTO replyDTO) {
@@ -22,8 +25,8 @@ public interface ReplyService {
     return reply;
   }
 
-  default ReplyDTO entityToDTO(Reply reply) {
-    ReplyDTO.builder()
+  default ReplyDTO entityToDto(Reply reply) {
+    return ReplyDTO.builder()
         .rno(reply.getRno())
         .text(reply.getText())
         .commenter(reply.getCommenter())
@@ -31,6 +34,5 @@ public interface ReplyService {
         .regDate(reply.getRegDate())
         .modDate(reply.getModDate())
         .build();
-    return new ReplyDTO();
   }
 }

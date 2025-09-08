@@ -41,5 +41,5 @@ public interface BoardService {
 
   Long modify(BoardDTO boardDTO, PageRequestDTO pageRequestDTO);
 
-  Long remove(BoardDTO boardDTO);
+//  Long remove(BoardDTO boardDTO);
 }

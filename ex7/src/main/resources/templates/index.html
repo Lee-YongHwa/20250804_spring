@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>ex7 Index</h1>
+<div sec:authorize="isAuthenticated()">
+    Only Authenticated user can see this Text
+</div>
+
+<ul>
+    <li><a th:href="@{/sample/all}">/sample/all</a></li>
+    <li><a th:href="@{/sample/manager}">/sample/manager</a></li>
+    <li><a th:href="@{/sample/admin}">/sample/admin</a></li>
+    <li><a th:href="@{/auth/modify}">/auth/modify</a></li>
+    <li><a th:href="@{/logout}">/logout</a></li>
+    <li><a th:href="@{/auth/logout}">/logout(사용자 지정)</a></li>
+</ul>
+<script th:inline="javascript">
+    //location.replace("http://localhost:8080/ex7/")
+</script>
+
+</body>
+</html>

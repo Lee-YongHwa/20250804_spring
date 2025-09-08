@@ -18,8 +18,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
   // 쿼리메서드는 내부적최적화가 되어 있으나 대량데이터일경우 성능저하발생
   // 쿼리메서드로 할 경우 Board의 bno를 가져와야 함으로 Board_Bno
   // void deleteByBoard_Bno(Long bno); //
-  
-  // 댓글 목록 가져오기
-  List<Reply> getRepliesByBoardOrderByBno(Board board);
 
-  }
+  // bno에 의해서 댓글 목록 가져오기
+  List<Reply> getRepliesByBoardOrderByRno(Board board);
+}

@@ -64,13 +64,13 @@ public class BoardController {
   @PostMapping("/remove")
   public String remove(BoardDTO boardDTO,
                        PageRequestDTO pageRequestDTO, RedirectAttributes ra) {
-    Long bno = boardService.remove(boardDTO);
+    boardService.removeWithReplies(boardDTO.getBno());
     if (boardService.getList(pageRequestDTO).getDtoList().size() == 0
         && pageRequestDTO.getPage() != 1) {
       pageRequestDTO.setPage(pageRequestDTO.getPage() - 1);
     }
     typeKeywordInit(pageRequestDTO);  //null 문자열을 삭제처리
-    ra.addFlashAttribute("msg", bno+" 번 글이 삭제되었습니다."); //일회성
+    ra.addFlashAttribute("msg", boardDTO.getBno()+" 번 글이 삭제되었습니다.");
     ra.addAttribute("page", pageRequestDTO.getPage());
     ra.addAttribute("type", pageRequestDTO.getType());
     ra.addAttribute("keyword", pageRequestDTO.getKeyword());

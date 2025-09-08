@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+<h1>Index</h1>
+<ul>
+    <li><a th:href="@{/testUpload}">testUpload</a></li>
+    <li><a th:href="@{/movie/register}">Movie Register</a></li>
+    <li><a th:href="@{/movie/list}">Movie</a></li>
+</ul>
+<script th:inline="javascript">
+    location.replace("http://localhost:8080/ex6/movie")
+</script>
+</body>
+</html>

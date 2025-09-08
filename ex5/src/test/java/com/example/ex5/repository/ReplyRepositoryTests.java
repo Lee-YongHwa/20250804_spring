@@ -43,7 +43,7 @@ class ReplyRepositoryTests {
 
   @Test
   public void testListByBoard() {
-    List<Reply> replyList = replyRepository.getRepliesByBoardOrderByBno(
+    List<Reply> replyList = replyRepository.getRepliesByBoardOrderByRno(
         Board.builder().bno(10l).build()
     );
     replyList.forEach(reply -> System.out.println(reply));

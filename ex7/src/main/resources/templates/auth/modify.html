@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Modify</h1>
+<form th:action="@{/auth/modify}" method="post">
+    E-mail: <input type="text" name="username"
+                   th:value="${#authentication.principal.username}" readonly>
+    <input type="hidden" name="email"
+           th:value="${#authentication.principal.username}" readonly><br>
+    이름: <input type="text" name="name" id="name"
+               th:value="${#authentication.principal.name}"><br>
+    비밀번호: <input type="password" name="password" id="password"><br>
+    비밀번호 확인: <input type="password" id="rePassword"><br>
+    <button>변경</button>
+</form>
+<script th:inline="javascript">
+    const btn = document.querySelector("button")
+    btn.onclick = function(e) {
+        e.preventDefault();
+        cont name = document.querySelector("#name")
+        cont pass1 = document.querySelector("#password")
+        cont pass2 = document.querySelector("#rePassword")
+        if(!pass1.value && !pass2.value) {
+            alert("비밀번호를 확인하세요.");
+            pass1.focus();
+            return false;
+        }
+        if(pass1.value != pass2.value) {
+            alert("비밀번호가 상이합니다.");
+            pass1.value=""; pass2.value="";pass1.focus();
+            return false;
+        }
+        if(name.value) {
+           alert("이름을 확인하세요.");name.focus();
+           return false;
+        }
+        document.querySelector("form").submit();
+    }
+</script>
+</body>
+</html>

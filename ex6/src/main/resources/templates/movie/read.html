@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <style>
+            .form-group {margin-bottom: 20px;}
+            .modal-body input {margin-bottom: 10px;}
+            .uploadResult {width: 100%;background: gray;margin-top: 10px;}
+            .uploadResult ul {
+                display: flex;flex-flow: row;justify-content: center;
+                align-items: center;vertical-align: top;overflow: auto;
+            }
+            .uploadResult ul li {list-style: none;padding: 10px;margin-left: 2em;}
+            .uploadResult ul li img {width: 100px;}
+            .star {position: relative;font-size: 2rem;color: #ddd;}
+            .star input {width: 100%;height: 100%;position: absolute;left: 0;
+                opacity: 0;cursor: pointer;}
+            .star span {width: 0;position: absolute;left: 0;color: #ffc83d;
+                overflow: hidden;pointer-events: none;-webkit-text-stroke: 2px black;
+            }
+        </style>
+        <h1 class="mt-4">Movie Read Page</h1>
+        <div class="form-group">
+            <label for="mno">Mno</label>
+            <input type="text" id="mno" class="form-control" readonly th:value="${movieDTO.mno}">
+        </div>
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" class="form-control" th:value="${movieDTO.title}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="avg">Average</label>
+            <input type="text" id="avg" class="form-control" th:value="${movieDTO.avg}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="reviewCnt">Review Count</label>
+            <input type="text" id="reviewCnt" class="form-control" th:value="${movieDTO.reviewCnt}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="regDate">Register Date</label>
+            <input type="text" name="regDate" id="regDate" class="form-control" readonly
+                th:value="${#temporals.format(movieDTO.regDate, 'yyyy/MM/dd hh:mm')}">
+        </div>
+        <div class="form-group">
+            <label for="modDate">Modified Date</label>
+            <input type="text" name="modDate" id="modDate" class="form-control" readonly
+                th:value="${#temporals.format(movieDTO.modDate, 'yyyy/MM/dd hh:mm')}">
+        </div>
+        <div class="form-group">
+            <a class="btn btn-primary"
+                th:href="@{/movie/modify(page=${pageRequestDTO.page},mno=${movieDTO.mno},type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}">Modify</a>
+            <a class="btn btn-info"
+                th:href="@{/movie/list(page=${pageRequestDTO.page},type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}">List</a>
+        </div>
+        <!-- 영화포스터가 있는 경우 출력해주는 부분 -->
+        <div class="uploadResult">
+            <ul>
+                <li th:if="${movieDTO.imageDTOList.size()>0}"
+                    th:each="movieImageDTO : ${movieDTO.imageDTOList}" 
+                    th:data-file="${movieImageDTO.getImageURL}"
+                    th:onclick="viewPicture([[${movieImageDTO.getImageURL}]])"
+                    style="cursor:pointer;">
+                    <span th:if="${movieImageDTO.path != null}"><img 
+                    th:src="|@{/display(fileName=${movieImageDTO.getThumbnailURL})}|"
+                    alt="poster"></span>
+                    <span th:if="${movieImageDTO.path == null}"><img 
+                    src="https://placehold.co/70x100/lightblue/white?text=no+image\npath"
+                    alt="poster"></span>
+                </li>
+            </ul>
+        </div>
+        <!-- 리뷰갯수와 추가 버튼 -->
+        <div class="mt-4">
+            <span class="btn btn-outline-secondary" onclick="addReview()">Add Review</span>
+            <span style="font-size:9pt">리뷰:
+                <span id="revCnt" th:text="${movieDTO.reviewCnt}"></span> 개
+            </span>
+        </div>
+        <!-- 리뷰 목록이 나오는 부분 -->
+        <div class="list-group reviewList" style="margin: 20px 0;"></div>
+        <!-- 모달 -->
+        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script th:inline="javascript">
+            const mno = [[${ movieDTO.mno }]] // 상세보기의 영화 번호를 mno 변수 할당
+
+            // 다큐먼트 읽고 난 뒤 실행되는 스크립트
+            window.onload = () => {
+                var msg = [[${ msg }]] // 수정후 넘어오는 수정메시지
+                loadReviewJSON() // 리뷰을 REST하게 불러오는 함수 호출
+                if(msg === '' || history.state) return// 모달창 안띄우는 코드
+                if (msg) {
+                    // 수정후 변경사항을 위한 모달 인스턴스 생성
+                    const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                    document.querySelector(".modal-body").innerHTML = `<p>${msg}되었습니다.</p>`
+                    document.querySelector("#exampleModalLabel")
+                    .innerHTML = `<p>${msg.split(" ")[2]}창</p>`
+                    myModal.show()
+                }
+                history.replaceState({}, null, null)
+            }
+
+            // 리뷰목록을 불러오는 함수
+            function loadReviewJSON() {
+                const reviewListGroup = document.querySelector(".reviewList") //리뷰를 넣는 공간 선언
+                const url = /*[[@{/reviews/}]]*/'url' //리뷰 목록을 불러오기 위한 주소 선언
+                // Ajax로 데이터를 비동기적으로 불러오는 함수 실행
+                fetch(url + mno, { method: 'GET', })  // 주소 예: '/reviews/50'
+                    // 서버에서 리뷰 목록을 json으로 받음
+                    .then(response => response.json()) //json(),text(),blob(),formData(),arrayBuffer()
+                    // 리뷰 목록을 페이지에서 사용하기 위한 처리
+                    .then(data => {
+                        let str = "";
+                        // 목록 개수만큼 반복
+                        for (let i = 0; i < data.length; i++) {
+                            // str에는 하나의 리뷰를 담음
+                            str += `
+                            <div class="card-body form-control mb-1"
+                            onmouseover="this.style.background='#d6e6ff'"
+                            onmouseout="this.style.background='white'"
+                            data-review-num="${data[i].reviewNum}" data-text="${data[i].text}"
+                            data-mid="${data[i].mid}" data-grade="${data[i].grade}"
+                            data-email="${data[i].email}" data-nickname="${data[i].nickname}"
+                            style="padding:5px 20px;cursor:pointer;"
+                            onclick="viewReview('${data[i].reviewNum}','${data[i].text}','${data[i].mid}',
+                            '${data[i].grade}', '${data[i].nickname}')"
+                            >
+                                <div style="display:inline-block;width:40%">
+                                    <h6 style="display:inline-block;width:70px">${data[i].reviewNum}</h6>
+                                    <h5 class="card-text" style="display:inline-block;">${data[i].text}</h5>
+                                </div>
+                                <div style="display:inline-block;width:17%;text-align:left;">
+                                    <span class="star-rating" data-grade="${data[i].grade}"></span>
+                                </div>
+                                <div style="display:inline-block;width:40%;text-align:right;right-padding:20px;">
+                                    <span class="card-subtitle text-muted">${data[i].nickname}</span>
+                                    <span class="card-subtitle text-muted"
+                                    style="display:inline-block;width:150px;color:rgb(148, 163, 184);"
+                                    >${formatDateTime(data[i].regDate)}</span>
+                                </div>
+                            </div>
+                        `
+                        }
+                        reviewListGroup.innerHTML = str // 돔트리에 str을 마운트 시킴
+                        // 리뷰의 별표시를 위해서 해당 span태그를 모두 불러옴
+                        const starRatings = document.querySelectorAll(".star-rating")
+                        for (let i = 0; i < starRatings.length; i++) { //리뷰개수만큼 반복
+                            let strStar = '';
+                            for (let j = 0; j < starRatings[i].dataset.grade; j++) {
+                                strStar += "⭐" //하나의 리뷰가 가지는 grade를 ⭐로 표시.
+                            }
+                            starRatings[i].innerHTML = strStar; // 돔트리에 str을 마운트 시킴
+                        }
+                    })
+            }
+            function formatDateTime(str) {  // 날짜 시간 포맷 함수
+                const date = new Date(str)
+                return `${date.getFullYear()}/${len2(date.getMonth() + 1)}`
+                    + `/${len2(date.getDate())} ${len2(date.getHours())}:`
+                    + `${len2(date.getMinutes())}`
+            }
+            function len2(num) { return (num < 10) ? "0" + num : num;} //2자리 맞춤 함수 
+            
+            // 별을 클릭할 때마다 grade의 수치를 생성해주는 함수
+            function drawStar(target) { document.querySelector('.star span').style.width = `${target.value * 10}%` }
+
+            // 리뷰 저장 모달 창 띄우기
+            function addReview() {
+                // 모달 창 제목
+                document.querySelector("#exampleModalLabel").textContent = "Review 추가하기"
+                // 모달 바디
+                document.querySelector(".modal-body").innerHTML = `
+                    <label>회원 번호</label>
+                    <input type="text" class="form-control" name="mid" value="10">
+                    <label id="grade">Grade</label>
+                    <span class="star">★★★★★<span>★★★★★</span>
+                    <input type="range" oninput="drawStar(this)" value="1" step="2" min="0" max="10">
+                    </span><br>
+                    <input type="text" class="form-control" name="text" placeholder="Review...">
+                    <label>회원 Email</label>
+                    <input type="text" class="form-control" name="email" value="user10@a.a">
+                `
+                // 모달 푸터
+                document.querySelector(".modal-footer").innerHTML = `
+                    <button type="button" class="btn btn-primary save" onclick="saveReview()">등록</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                `
+                // 리뷰 추가하기 위한 모달 인스턴스 생성
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                myModal.show() // 모달 인스턴스를 실제 보여주는 함수
+            }
+            
+            // 리뷰 저장 하기
+            function saveReview() { 
+                // 리뷰를 저장하기 위한 3가지(mid, text, grade)
+                let mid = document.querySelector(".modal-body input[name='mid']")
+                let text = document.querySelector(".modal-body input[name='text']")
+                let grade = parseFloat(document.querySelector(".star span").style.width) * 0.01 * 5;
+
+                // Review 등록 모달창에 값의 유효성 검사
+                if (!mid.value) {
+                    mid.setAttribute('placeholder', '회원번호를 확인하세요')
+                    mid.focus(); return false;
+                }
+                if (!text.value) {
+                    text.setAttribute('placeholder', '리뷰을 확인하세요')
+                    text.focus(); return false;
+                }
+
+                if (Number.isNaN(grade)) { alert('Review 별점을 확인하세요'); return false; }
+
+                // 현재의 모달창을 닫고 난 뒤 등록 처리
+                const myModalEl = document.getElementById('myModal');
+                const modal = bootstrap.Modal.getInstance(myModalEl);
+                modal.hide();
+
+                // 리뷰 등록을 위한 자바스크립트 객체 선언
+                let review = { mno: mno, text: text.value, mid: mid.value, grade: grade }
+                
+                const url = /*[[@{/reviews}]]*/'url'  // 리뷰를 저장하는 주소
+                fetch(url, {
+                    method: 'POST', headers: { 'Content-type': 'application/json' },
+                    body: JSON.stringify(review) // json 문자열로 변환
+                })
+                    .then(res => res.text()) // json(),text(),blob(),formData(),arrayBuffer()
+                    .then(function (data) {
+                        // 새로운 모달 창 띄우기
+                        const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                        document.querySelector("#exampleModalLabel").textContent = "Review 등록 완료"
+                        document.querySelector(".modal-body").innerHTML = `${data} 알림`
+                        document.querySelector(".modal-footer .save").style.display = 'none'
+                        let cnt = document.querySelector("#revCnt") // 댓글 개수 1 증가
+                        cnt.textContent = parseInt(cnt.textContent) + 1;
+                        myModal.show() // 리뷰 등록 완료 모달
+                        loadReviewJSON() // 댓글 추가 후 리뷰목록 다시 불러 오기
+                    })
+            }
+
+            // 리뷰 상세 보기 모달 창 띄우기
+            function viewReview(reviewNum, text, mid, grade, nickname) {
+                // 모달 인스턴스 초기화
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                // 모달 헤더
+                document.querySelector("#exampleModalLabel").textContent = reviewNum + "번 Review 보기"
+                // 모달 바디
+                document.querySelector(".modal-body").innerHTML = `
+                    <input type="hidden" class="form-control" name="reviewNum" value="${reviewNum}">
+                    <input type="hidden" class="form-control" name="mid" value="${mid}">
+                    <label id="grade">Grade</label>
+                    <span class="star">★★★★★<span>★★★★★</span>
+                    <input type="range" oninput="drawStar(this)" value="1" step="2" min="0" max="10">
+                    </span><br>
+                    <input type="text" class="form-control" name="text" value="${text}">
+                `
+                // 모달 푸터
+                document.querySelector(".modal-footer").innerHTML = `
+                    <button type="button" class="btn btn-warning modify" onclick="modifyReview('${reviewNum}')">수정</button>
+                    <button type="button" class="btn btn-danger remove" data-bs-dismiss="modal" onclick="removeReview('${reviewNum}')">삭제</button>
+                    <span class="btn btn-secondary" data-bs-dismiss="modal">닫기</span>
+                `
+                // .modal-body .star의 span width를 grade * 20해서 별모양 표시
+                document.querySelector('.modal-body .star span').style.width = `${grade * 20}%`
+
+                myModal.show() // 모달 나타내기
+            }
+            
+            // 리뷰 수정 하기
+            function modifyReview(reviewNum) {
+                // 유효성검사, 수정url로 데이터 보내기, 모달창 변경
+                let text = document.querySelector(".modal-body input[name='text']")
+                let grade = parseFloat(document.querySelector(".star span").style.width) * 0.01 * 5;
+                let mid = document.querySelector(".modal-body input[name='mid']")
+
+                // 유효성 검사
+                if (!text.value || text.value == '') {
+                    text.setAttribute('placeholder', '리뷰을 확인하세요')
+                    text.focus()
+                    return false;
+                }
+                if (Number.isNaN(grade)) { alert('Review 별점을 확인하세요'); return false; }
+
+                // 현재의 모달창을 닫는 것
+                const myModalEl = document.getElementById('myModal');
+                const modal = bootstrap.Modal.getInstance(myModalEl);
+                modal.hide();
+
+                let review = {mno: mno, text: text.value, mid: mid.value
+                              , grade: grade, reviewNum: reviewNum}
+                //alert(JSON.stringify(review))
+                const url = /*[[@{/reviews}]]*/'url'
+                fetch(url, {
+                    method: 'PUT', headers: { 'Content-type': 'application/json' },
+                    body: JSON.stringify(review)
+                })
+                    .then(res => res.text()) // json(),text(),blob(),formData(),arrayBuffer()
+                    .then(function (data) {
+                        const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                        document.querySelector("#exampleModalLabel").textContent = "리뷰 수정 완료"
+                        document.querySelector(".modal-body").innerHTML = `${data} 알림`
+                        document.querySelector(".modal-footer .modify").style.display = 'none'
+                        document.querySelector(".modal-footer .remove").style.display = 'none'
+                        myModal.show()
+                        loadReviewJSON()
+                    })
+            }
+
+            // 리뷰 삭제 하기
+            function removeReview(reviewNum) {
+                // 유효성검사, 수정url로 데이터 보내기, 모달창 변경
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                let review = { reviewNum: reviewNum }
+                const url = /*[[@{/reviews/}]]*/'url'
+                fetch(url+reviewNum, {
+                    method: 'DELETE', headers: { 'Content-type': 'application/json' },
+                })
+                    .then(res => res.text()) // json(),text(),blob(),formData(),arrayBuffer()
+                    .then(function (data) {
+                        document.querySelector("#exampleModalLabel").textContent = "리뷰 삭제 완료"
+                        document.querySelector(".modal-body").innerHTML = `${data} 알림`
+                        document.querySelector(".modal-footer .modify").style.display = 'none'
+                        document.querySelector(".modal-footer .remove").style.display = 'none'
+                        let cnt = document.querySelector("#revCnt")
+                        cnt.textContent = parseInt(cnt.textContent) - 1;
+                        myModal.show()
+                        loadReviewJSON()
+                    })
+            }
+
+            // 원본 이미지 보기
+            function viewPicture(file) {
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                const url = /*[[@{/display}]]*/'url'
+                document.querySelector(".modal-title").innerHTML = `<p>원본 이미지</p>`
+                document.querySelector(".modal-body").innerHTML = 
+                `<img style='width: 100%' src='${url}?fileName=${file}'>`
+                myModal.show();
+            }
+        </script>
+    </th:block>
+</th:block>
+
+</html>

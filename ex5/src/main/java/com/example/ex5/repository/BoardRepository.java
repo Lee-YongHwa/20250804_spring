@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board, Long>
     , SearchBoardRepository {
-// SearchBoardRepository를 별도로 사용하는 이유 : 복수개의 엔티티를 검색하기 위해 별도의 interface 로 분리
+// SearchBoardRepository:복수개의 엔티티를 검색하기 위해 별도의 interface 로 분리
 
 //   JPQL  :: JPA(Java Persistence API)+SQL 에서 사용하는 객체지향 쿼리 언어
 //   select b, r from Board b left join Reply r on r.board = b where b.bno=100;
