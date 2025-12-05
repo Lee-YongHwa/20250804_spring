@@ -25,6 +25,7 @@ public class ClubUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    log.info("loadUserByUsername.............");
     Optional<ClubMember> result = clubMemberRepository.findByEmail(username);
     // 데이터베이스에 사용자가 없을 경우 강제로 exception 발생, 프레임웍이 에러메시지를 컨트롤러로 전달
     if(!result.isPresent()) throw new UsernameNotFoundException("Check Email or Social");

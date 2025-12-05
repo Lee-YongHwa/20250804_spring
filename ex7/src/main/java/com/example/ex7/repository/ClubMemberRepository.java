@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface ClubMemberRepository extends JpaRepository<ClubMember, String> {
-
+  sitory, BCryptPass
   @EntityGraph(attributePaths = {"roleSet"}, type = EntityGraph.EntityGraphType.LOAD)
   @Query("select m from ClubMember m where m.email=:email")
   Optional<ClubMember> findByEmail(@Param("email") String email);

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.mybatis_ex.mappers.MembersMapper">
+
+  <select id="getMember" parameterType="java.lang.String"
+          resultType="com.example.mybatis_ex.entity.Members">
+    select mno, email, pass, name from testmembers where email = #{email}
+  </select>
+
+  <insert id="insertMembers" parameterType="com.example.mybatis_ex.entity.Members"
+          useGeneratedKeys="true" keyProperty="mno">
+    insert into testmembers(email, pass, name, regdate, moddate)
+    values(#{email}, #{pass}, #{name}, NOW(), NOW())
+  </insert>
+
+  <update id="updateMembers" parameterType="com.example.mybatis_ex.entity.Members">
+    update testmembers set email=#{email}, pass=#{pass}, name=#{name}, modDate=NOW()
+    where mno = #{mno}
+  </update>
+
+  <delete id="deleteMembers" parameterType="long">
+    delete from testmembers where mno = #{mno}
+  </delete>
+
+  <select id="getAllMembers" resultType="com.example.mybatis_ex.entity.Members">
+    select * from testmembers
+  </select>
+</mapper>

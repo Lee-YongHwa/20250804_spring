@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 @Log4j2
 public class MemoController {
-
   private final MemoService memoService;
 
   // 1) 요청된 url이 resource와 같을 때
